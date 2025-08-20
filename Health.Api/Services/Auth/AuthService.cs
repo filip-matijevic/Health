@@ -1,9 +1,13 @@
-﻿using Health.Api.Data;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Health.Api.Data;
 using Health.Api.Entities;
 using Health.Api.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Health.Api.Service.Auth;
 
@@ -22,7 +26,7 @@ public class AuthService(HealthDbContext context) : IAuthService
             return null;
         }
 
-        return "ok";
+        return CreateToken(user);
     }
 
     public async Task<User?> RegisterAsync(RegisterRequestDto request)
@@ -45,5 +49,26 @@ public class AuthService(HealthDbContext context) : IAuthService
     public async Task<int> GetUserCount()
     {
         return await context.Users.CountAsync();
+    }
+
+    private string CreateToken(User user){
+
+        var claims = new List<Claim>{
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("TOKEN")!));
+
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
+
+        var tokenDescriptor = new JwtSecurityToken(
+            issuer:Environment.GetEnvironmentVariable("ISSUER")!,
+            audience:Environment.GetEnvironmentVariable("AUDIENCE")!,
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(1),
+            signingCredentials: creds
+            );
+        return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
     }
 }
