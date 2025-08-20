@@ -1,20 +1,31 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Health.Api.Data;
+using Health.Api.Entities;
+using Health.Api.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Health.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController(HealthDbContext context) : ControllerBase
 {
-    [HttpGet("GetSomething")]
-    public IActionResult GetSomething()
+    [HttpPost("register")]
+    public ActionResult<User> Register([FromBody] RegisterRequestDto request)
     {
-        return Ok("Something");
+        return Ok(request);
     }
 
-    [HttpGet("GetSomethingElse")]
-    public IActionResult GetSomethingElse()
+    [HttpGet("login")]
+    public IActionResult Login()
     {
         return Ok("Something Else");
+    }
+
+    [HttpGet("users")]
+    public IActionResult GetAllUsers()
+    {
+        return Ok(context.Users.ToList());
     }
 }
