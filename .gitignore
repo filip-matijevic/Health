@@ -1,0 +1,23 @@
+cat > .gitignore <<EOL
+# .NET
+bin/
+obj/
+.vs/
+
+# Logs
+*.log
+logs/
+
+# Node/Frontend
+node_modules/
+dist/
+build/
+.vite/
+.next/
+
+# Env/config
+.env
+.env.*
+appsettings.*.json
+!appsettings.json
+EOL
