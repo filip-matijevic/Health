@@ -1,6 +1,7 @@
 using Health.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
+using Health.Api.Service.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,7 @@ builder.Services.AddDbContext<HealthDbContext>(
     options => 
     options.UseNpgsql(dbPath)
 );
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 var app = builder.Build();

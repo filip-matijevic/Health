@@ -1,6 +1,7 @@
 ﻿using Health.Api.Data;
 using Health.Api.Entities;
 using Health.Api.Models;
+using Health.Api.Service.Auth;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,23 +10,31 @@ namespace Health.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(HealthDbContext context) : ControllerBase
+public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost("register")]
-    public ActionResult<User> Register([FromBody] RegisterRequestDto request)
+    public async Task<ActionResult<User>> Register([FromBody] RegisterRequestDto request)
     {
-        return Ok(request);
+        User? user = await authService.RegisterAsync(request);
+        if (user is null){
+            return BadRequest("Username already exists");
+        }
+        return Ok(user);
     }
 
-    [HttpGet("login")]
-    public IActionResult Login()
+    [HttpPost("login")]
+    public async Task<ActionResult<string>> Login(LoginRequestDto request)
     {
-        return Ok("Something Else");
+        var result = await authService.LoginAsync(request);
+        if (result is null){
+            return BadRequest("Username or Password incorrect");
+        }
+        return Ok(result);
     }
 
     [HttpGet("users")]
-    public IActionResult GetAllUsers()
+    public async Task<IActionResult> GetAllUsers()
     {
-        return Ok(context.Users.ToList());
+        return Ok(await authService.GetUserCount());
     }
 }
