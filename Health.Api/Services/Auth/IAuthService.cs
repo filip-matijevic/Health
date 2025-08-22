@@ -7,5 +7,6 @@ public interface IAuthService
 {
     Task<User?> RegisterAsync(RegisterRequestDto request);
     Task<string?> LoginAsync(LoginRequestDto request);
+    Task<TokenResponseDto?> RefreshTokenAsync(RefreshRequestDto request);
     Task<int> GetUserCount();
 }

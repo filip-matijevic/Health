@@ -46,6 +46,10 @@ public class AuthService(HealthDbContext context) : IAuthService
         return user;
     }
 
+    public async Task<TokenResponseDto?> RefreshTokenAsync(RefreshRequestDto request){
+        return null;
+    }
+
     public async Task<int> GetUserCount()
     {
         return await context.Users.CountAsync();

@@ -32,6 +32,12 @@ public class AuthController(IAuthService authService) : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("refreshToken")]
+    public async Task<ActionResult<TokenResponseDto>> RefreshToken(RefreshRequestDto request){
+        var token = await authService.RefreshTokenAsync(request);
+        return Ok();
+    }
+
     [HttpGet("users")]
     public async Task<IActionResult> GetAllUsers()
     {
