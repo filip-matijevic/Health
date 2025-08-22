@@ -10,6 +10,9 @@ function App() {
         <p className="text-white text-2xl">
           If you can read this in white, Tailwind works.
         </p>
+        <button className="text-white text-2xl" onClick={ButtonClicked}>
+          Click here
+        </button>
       </div>
     </>
   );
