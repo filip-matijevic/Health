@@ -9,16 +9,16 @@ function App() {
   return (
     <>
       <ParticlesBackground />
-      <div className="h-screen flex flex-col items-center justify-center">
+      <div className="h-screen flex flex-col items-center justify-center p-6">
         <div
-          className="p-6 text-white bg-transparent border-2 rounded-lg flex flex-col items-center align-top w-fit 
+          className="p-6 text-white bg-transparent border-2 rounded-lg flex flex-col items-center align-top w-full 
         backdrop-blur-sm"
         >
-          <div className="w-100">
+          <div className="w-full">
             <div className="w-full h-12 border-b-1"></div>
             <div className="text-xs">USER NAME</div>
           </div>
-          <div className="w-100">
+          <div className="w-full">
             <div className="w-full h-12 border-b-1"></div>
             <div className="text-xs">PASSWORD</div>
           </div>
