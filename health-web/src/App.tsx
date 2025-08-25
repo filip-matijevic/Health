@@ -1,44 +1,58 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import LoginPage from "./components/pages/LoginPage";
 import { auth } from "./services/auth";
 import { HttpError } from "./lib/http";
+import HomePage from "./components/pages/HomePage";
+import { clearAccessToken } from "./lib/token";
 
 function App() {
-
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [name, setName] = useState<string>("");
 
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        const user = await auth.me();               // will throw if token invalid/missing
-        setIsAuthenticated(true);
-        console.log(user);
-        setName(user.name)
-      } catch (e) {
-        if (e instanceof HttpError) {
-          console.warn("Auth check failed:", e.status, e.body);
-        } else {
-          console.error("Unexpected error:", e);
-        }
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
+  const checkAuth = useCallback(async () => {
+    setLoading(true);
+    try {
+      const user = await auth.me(); // will throw if token invalid/missing
+      setIsAuthenticated(true);
+      setName(user.name ?? null);
+    } catch (e) {
+      if (e instanceof HttpError) {
+        console.warn("Auth check failed:", e.status, e.body);
+      } else {
+        console.error("Unexpected error:", e);
       }
+      setIsAuthenticated(false);
+      setName("");
+    } finally {
+      setLoading(false);
     }
-
-    checkAuth();
   }, []);
 
+  // run once on app start
+  useEffect(() => {
+    void checkAuth();
+  }, [checkAuth]);
+
+  function ResetLoggedInUser(): void {
+    clearAccessToken();
+    setIsAuthenticated(false);
+    setName("");
+  }
 
   return (
     <div className="h-screen min-h-dvh w-screen bg-gray-800 overflow-hidden">
-      {loading ?? (<div className="h-screen flex items-center justify-center text-gray-50">
-        Loading...
-      </div>)}
+      {loading ?? (
+        <div className="h-screen flex items-center justify-center text-gray-50">
+          Loading...
+        </div>
+      )}
 
-      {!isAuthenticated ? (<LoginPage/>) : (<div className="text-green-500">Welcome user!!!! {name}</div>)}
+      {!isAuthenticated ? (
+        <LoginPage onLogIn={checkAuth}/>
+      ) : (
+        <HomePage onLogOut={ResetLoggedInUser} userName={name}/>
+      )}
     </div>
   );
 }

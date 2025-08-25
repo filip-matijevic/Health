@@ -4,7 +4,11 @@ import { setAccessToken } from "../../lib/token";
 import { auth } from "../../services/auth";
 import TextInput from "../inputs/TextInput";
 
-export default function Submit() {
+type Props = {
+    onLogIn: () => void;
+  };
+
+export default function LoginPage({onLogIn}:Props) {
   const userNameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -21,6 +25,7 @@ export default function Submit() {
       const res = await auth.login(userNameRef.current.value, passwordRef.current.value);
       console.log(res.accessToken);
       setAccessToken(res.accessToken);
+      onLogIn();
 
       const checkName = await auth.me();
       console.log(checkName);
