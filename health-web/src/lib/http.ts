@@ -18,14 +18,21 @@ export interface HttpOptions<TBody = unknown> {
 }
 
 export class HttpError extends Error {
-  constructor(
-    public status: number,
-    public statusText: string,
-    public body?: unknown
-  ) {
-    super(`HTTP ${status} ${statusText}`);
+    status: number;
+    statusText: string;
+    body?: unknown;
+  
+    constructor(status: number, statusText: string, body?: unknown) {
+      super(`HTTP ${status} ${statusText}`);
+      this.status = status;
+      this.statusText = statusText;
+      this.body = body;
+  
+      // Ensure instanceof works correctly across transpilation targets
+      Object.setPrototypeOf(this, new.target.prototype);
+      this.name = "HttpError";
+    }
   }
-}
 
 export async function http<TResp, TBody = unknown>(
   endpoint: string,
