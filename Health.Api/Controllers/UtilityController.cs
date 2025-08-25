@@ -16,6 +16,7 @@ public class UtilityController() : ControllerBase
     [HttpGet("ping")]
     public async Task<IActionResult> SayPong()
     {
+        Console.WriteLine("Hello!");
         return Ok("pong");
     }
 }

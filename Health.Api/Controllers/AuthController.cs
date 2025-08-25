@@ -2,6 +2,7 @@
 using Health.Api.Entities;
 using Health.Api.Models;
 using Health.Api.Service.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         if (result is null){
             return BadRequest("Username or Password incorrect");
         }
-        return Ok(result);
+        return Ok(new TokenResponseDto(result, ""));
     }
 
     [HttpPost("refreshToken")]
@@ -42,5 +43,13 @@ public class AuthController(IAuthService authService) : ControllerBase
     public async Task<IActionResult> GetAllUsers()
     {
         return Ok(await authService.GetUserCount());
+    }
+
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<IActionResult> Me(){
+        var name = User.Identity?.Name;
+        Console.WriteLine("We are ok, i think");
+        return Ok(new { name });
     }
 }

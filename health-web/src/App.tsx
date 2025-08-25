@@ -1,34 +1,45 @@
-import ParticlesBackground from "./components/Background/ParticlesBackground";
+import { useEffect, useState } from "react";
+import LoginPage from "./components/pages/LoginPage";
+import { auth } from "./services/auth";
+import { HttpError } from "./lib/http";
 
 function App() {
-  function ButtonClicked(event: React.MouseEvent<HTMLButtonElement>) {
-    event.preventDefault(); // optional
-    console.log("Button clicked 222!", event.currentTarget);
-  }
+
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [name, setName] = useState<string>("");
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const user = await auth.me();               // will throw if token invalid/missing
+        setIsAuthenticated(true);
+        console.log(user);
+        setName(user.name)
+      } catch (e) {
+        if (e instanceof HttpError) {
+          console.warn("Auth check failed:", e.status, e.body);
+        } else {
+          console.error("Unexpected error:", e);
+        }
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkAuth();
+  }, []);
+
 
   return (
-    <>
-      <ParticlesBackground />
-      <div className="h-screen flex flex-col items-center justify-center p-6">
-        <div
-          className="p-6 text-white bg-transparent border-2 rounded-lg flex flex-col items-center align-top w-full 
-        backdrop-blur-sm"
-        >
-          <div className="w-full">
-            <div className="w-full h-12 border-b-1"></div>
-            <div className="text-xs">USER NAME</div>
-          </div>
-          <div className="w-full">
-            <div className="w-full h-12 border-b-1"></div>
-            <div className="text-xs">PASSWORD</div>
-          </div>
-          <button
-           className="text-white border-1 rounded-lg px-4 py-2 mt-4 w-fit" onClick={ButtonClicked}>
-            SIGN IN
-          </button>
-        </div>
-      </div>
-    </>
+    <div className="h-screen min-h-dvh w-screen bg-gray-800 overflow-hidden">
+      {loading ?? (<div className="h-screen flex items-center justify-center text-gray-50">
+        Loading...
+      </div>)}
+
+      {!isAuthenticated ? (<LoginPage/>) : (<div className="text-green-500">Welcome user!!!! {name}</div>)}
+    </div>
   );
 }
 
