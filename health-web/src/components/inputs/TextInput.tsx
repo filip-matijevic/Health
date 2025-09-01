@@ -21,7 +21,9 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({label, type="te
             focus:border-b-2"
             ref={ref}
             type={type}
-            placeholder={label}>
+            placeholder={label}
+            autoComplete="off"
+            >
             </input>
         </div>
     );

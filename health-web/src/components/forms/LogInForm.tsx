@@ -3,7 +3,11 @@ import RoundedButton from "../inputs/RoundedButton";
 import TextInput from "../inputs/TextInput";
 import { useLogin } from "../../hooks/useLogin";
 
-export default function LogInForm() {
+type Props = {
+    onLoginSuccess: () => void;
+  };
+
+export default function LogInForm({onLoginSuccess} : Props) {
   const userNameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const {loading, error, login} = useLogin();
@@ -13,6 +17,7 @@ export default function LogInForm() {
     try {
       await login(userNameRef.current.value, passwordRef.current.value);
       // TODO: navigate / emit success callback here if needed
+      onLoginSuccess();
     } catch {
       // error state already handled in hook
       console.error(error);

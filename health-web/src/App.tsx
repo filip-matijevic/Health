@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { auth } from "./services/auth";
 import { HttpError } from "./lib/http";
 import HomePage from "./components/pages/HomePage";
 import { clearAccessToken } from "./lib/token";
@@ -12,7 +11,6 @@ function App() {
 
   const checkAuth = useCallback(async () => {
     try {
-      const user = await auth.me(); // will throw if token invalid/missing
       setIsAuthenticated(true);
     } catch (e) {
       if (e instanceof HttpError) {
@@ -34,6 +32,9 @@ function App() {
     clearAccessToken();
     setIsAuthenticated(false);
   }
+  function SetLoggedInUser(): void {
+    setIsAuthenticated(true);
+  }
 
   if (isAuthenticated) {
     return (
@@ -47,7 +48,7 @@ function App() {
     <div className="h-screen min-h-dvh w-screen bg-white overflow-hidden flex justify-center">
       <div className="bg-white space-y-2 w-66">
         <Landing />
-        <LogInForm />
+        <LogInForm onLoginSuccess={SetLoggedInUser}/>
         <RoundedButton label="Registger" color="red-500" filled={false} />
       </div>
     </div>

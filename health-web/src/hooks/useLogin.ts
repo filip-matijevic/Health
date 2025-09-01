@@ -15,9 +15,8 @@ export function useLogin() {
       setAccessToken(res.accessToken);
 
       const me = await auth.me();
-      const details = await auth.userDetails();
 
-      return { me, details };
+      return { me };
     } catch (e) {
       if (e instanceof HttpError) setError(e.message);
       else setError("Unexpected error. Please try again.");

@@ -14,7 +14,7 @@ export default function HomePage({ userName, onLogOut }: Props) {
 
   return <div className="w-full h-full flex flex-col border-2 border-yellow-500">
     <div className="flex-1 bg-green-200">
-    CONTENT
+    {userName}
     </div>
     <RoundedButton label="log out" filled={false} onClick={LogOut}/>
     <Navigation/>
