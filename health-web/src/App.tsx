@@ -1,21 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
-import LoginPage from "./components/pages/LoginPage";
 import { auth } from "./services/auth";
 import { HttpError } from "./lib/http";
 import HomePage from "./components/pages/HomePage";
 import { clearAccessToken } from "./lib/token";
+import LogInForm from "./components/forms/LogInForm";
+import RoundedButton from "./components/inputs/RoundedButton";
+import Landing from "./components/static_elements/Landing";
 
 function App() {
-  const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [name, setName] = useState<string>("");
 
   const checkAuth = useCallback(async () => {
-    setLoading(true);
     try {
       const user = await auth.me(); // will throw if token invalid/missing
       setIsAuthenticated(true);
-      setName(user.name ?? null);
     } catch (e) {
       if (e instanceof HttpError) {
         console.warn("Auth check failed:", e.status, e.body);
@@ -23,9 +21,7 @@ function App() {
         console.error("Unexpected error:", e);
       }
       setIsAuthenticated(false);
-      setName("");
     } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -37,22 +33,23 @@ function App() {
   function ResetLoggedInUser(): void {
     clearAccessToken();
     setIsAuthenticated(false);
-    setName("");
+  }
+
+  if (isAuthenticated) {
+    return (
+      <div className="h-screen min-h-dvh w-screen bg-white overflow-hidden flex justify-center">
+        <HomePage onLogOut={ResetLoggedInUser} />
+      </div>
+    );
   }
 
   return (
-    <div className="h-screen min-h-dvh w-screen bg-gray-800 overflow-hidden">
-      {loading ?? (
-        <div className="h-screen flex items-center justify-center text-gray-50">
-          Loading...
-        </div>
-      )}
-
-      {!isAuthenticated ? (
-        <LoginPage onLogIn={checkAuth}/>
-      ) : (
-        <HomePage onLogOut={ResetLoggedInUser} userName={name}/>
-      )}
+    <div className="h-screen min-h-dvh w-screen bg-white overflow-hidden flex justify-center">
+      <div className="bg-white space-y-2 w-66">
+        <Landing />
+        <LogInForm />
+        <RoundedButton label="Registger" color="red-500" filled={false} />
+      </div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ using Health.Api.Service.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Health.Api;
 
 
 Env.TraversePath().Load();
@@ -39,6 +40,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IMeasurementService, MeasurementService>();
 
 var allowedOrigins = (builder.Configuration["ALLOWED_ORIGIN"] ?? "")
     .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);

@@ -9,5 +9,6 @@ public class User
 
     public string? RefreshToken { get; set; }
     public DateTime RefreshTokenExpiryTime;
-    
+    public UserDetails? UserDetails { get; set; }
+    public UserMeasurements? UserMeasurements { get; set; }
 }

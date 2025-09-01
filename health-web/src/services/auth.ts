@@ -28,5 +28,12 @@ export const auth = {
             method: "GET",
             withAuth: true
         });
+    },
+    userDetails: () => {
+        return http<MeResponse>("api/userdetails/getUserDetails",
+        {
+            method: "GET",
+            withAuth: true
+        });
     }
 }

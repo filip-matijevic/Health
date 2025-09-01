@@ -3,6 +3,7 @@ using System;
 using Health.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Health.Api.Migrations
 {
     [DbContext(typeof(HealthDbContext))]
-    partial class HealthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250901205514_AddedUserMeasurements")]
+    partial class AddedUserMeasurements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,7 +36,8 @@ namespace Health.Api.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -42,7 +46,7 @@ namespace Health.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Measurements");
+                    b.ToTable("Measurement");
                 });
 
             modelBuilder.Entity("Health.Api.Entities.MeasurementEntry", b =>
@@ -64,7 +68,7 @@ namespace Health.Api.Migrations
 
                     b.HasIndex("MeasurementId");
 
-                    b.ToTable("MeasurementEntries");
+                    b.ToTable("MeasurementEntry");
                 });
 
             modelBuilder.Entity("Health.Api.Entities.User", b =>
