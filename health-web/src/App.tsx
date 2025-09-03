@@ -38,7 +38,13 @@ function App() {
 
   if (isAuthenticated) {
     return (
-      <div className="h-screen min-h-dvh w-screen bg-white overflow-hidden flex justify-center">
+      <div className="
+      flex flex-col
+    h-screen
+    supports-[height:100dvh]:h-[100dvh]
+    supports-[height:100svh]:h-[100svh]
+    pb-[env(safe-area-inset-bottom)]
+    bg-white">
         <HomePage onLogOut={ResetLoggedInUser} />
       </div>
     );
