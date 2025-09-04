@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { HttpError } from "./lib/http";
-import HomePage from "./components/pages/HomePage";
 import { clearAccessToken } from "./lib/token";
 import LogInForm from "./components/forms/LogInForm";
 import RoundedButton from "./components/inputs/RoundedButton";
 import Landing from "./components/static_elements/Landing";
+import NavigationPage from "./components/pages/NavigationPage";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -45,7 +45,7 @@ function App() {
     supports-[height:100svh]:h-[100svh]
     pb-[env(safe-area-inset-bottom)]
     bg-white">
-        <HomePage onLogOut={ResetLoggedInUser} />
+      <NavigationPage logOutUser={ResetLoggedInUser}/>
       </div>
     );
   }
