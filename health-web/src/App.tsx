@@ -1,32 +1,28 @@
-import { useCallback, useEffect, useState } from "react";
-import { HttpError } from "./lib/http";
+import { useEffect, useState } from "react";
 import { clearAccessToken } from "./lib/token";
 import LogInForm from "./components/forms/LogInForm";
 import RoundedButton from "./components/inputs/RoundedButton";
 import Landing from "./components/static_elements/Landing";
 import NavigationPage from "./components/pages/NavigationPage";
+import { useFetch } from "./hooks/useFetch";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const checkAuth = useCallback(async () => {
-    try {
-      setIsAuthenticated(true);
-    } catch (e) {
-      if (e instanceof HttpError) {
-        console.warn("Auth check failed:", e.status, e.body);
-      } else {
-        console.error("Unexpected error:", e);
-      }
-      setIsAuthenticated(false);
-    } finally {
-    }
-  }, []);
+  const { data, loading, error } = useFetch<string>(
+    "/api/Auth/me",
+    { method: "GET", auth: true }
+  );
 
-  // run once on app start
   useEffect(() => {
-    void checkAuth();
-  }, [checkAuth]);
+    if (!loading) {
+      if (data && !error) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+    }
+  }, [data, error, loading]);
 
   function ResetLoggedInUser(): void {
     clearAccessToken();

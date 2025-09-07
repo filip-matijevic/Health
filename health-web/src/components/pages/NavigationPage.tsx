@@ -50,7 +50,7 @@ export default function NavigationPage({ logOutUser }: Props) {
   }
 
   return (
-    <div className="bg-red-300 h-full w-full flex flex-col">
+    <div className="h-full w-full flex flex-col">
         
       <div hidden={true}>
         <RoundedButton

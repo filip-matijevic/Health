@@ -11,16 +11,18 @@ export default function MeasurementPage(){
         description: string;
     }
 
-    const { data: measurements, refetch} = useFetch<MeasurementType[]>("/api/Measurement/Measurements");
+    const { data: measurements, refetch} = useFetch<MeasurementType[]>("/api/Measurement/Measurements", {
+        method: "GET",
+        auth: true
+    });
     console.log(measurements);
 
     return(
     <div>
-        Measurement page
-        <ul>
+        <ul className="p-4 space-y-3">
             {measurements?.map(item => (
                 <li key={item.id}>
-                    <Measurement name={item.name}/>
+                    <Measurement name={item.name} id={item.id}/>
                 </li>
             ))}
         </ul>
