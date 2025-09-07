@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Health.Api;
+using Microsoft.OpenApi.Models;
 
 
 Env.TraversePath().Load();
@@ -17,15 +18,45 @@ builder.Configuration.AddEnvironmentVariables();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(
+    options =>
+    {
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Enter 'Bearer' [space] and then your token.\n\nExample: \"Bearer abc123xyz\""
+        });
+
+        options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+    }
+);
 builder.Services.AddDbContext<HealthDbContext>(
-    options => 
+    options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"))
 );
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
-    options =>{
-        options.TokenValidationParameters = new TokenValidationParameters{
+    options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
             ValidateIssuer = true,
             ValidIssuer = builder.Configuration["ISSUER"],
             ValidateAudience = true,
@@ -39,13 +70,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 );
 
 
+builder.Services.AddAuthorization();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMeasurementService, MeasurementService>();
 
 var allowedOrigins = (builder.Configuration["ALLOWED_ORIGIN"] ?? "")
     .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-    Console.WriteLine(allowedOrigins.Length);
+Console.WriteLine(allowedOrigins.Length);
 
 builder.Services.AddCors(options =>
 {

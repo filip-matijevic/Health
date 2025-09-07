@@ -21,5 +21,5 @@ public class MeasurementEntry{
     public Guid MeasurementId { get; set; }
     public decimal Value { get; set; }
     public DateTime Time { get; set; } = DateTime.UtcNow;
-    public required Measurement Measurement { get; set; }
+    public Measurement? Measurement { get; set; }
 }

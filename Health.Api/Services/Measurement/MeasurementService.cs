@@ -50,8 +50,53 @@ public class MeasurementService(HealthDbContext context) : IMeasurementService
         }
     }
 
-    public Task<List<string>> GetAllMeasurements(string userGuid)
+    public async Task<List<GetMeasurementDto>> GetMeasurements(Guid userId)
     {
-        throw new NotImplementedException();
+        var measurements = await context.Measurements.Where(m=>m.UserId == userId).ToListAsync();
+        List<GetMeasurementDto> meaNames = new List<GetMeasurementDto>();
+
+        foreach (Measurement measurement in measurements){
+            meaNames.Add(new GetMeasurementDto(measurement.Name, measurement.Description, measurement.Id.ToString()));
+        }
+
+        return meaNames;
+    }
+    public async Task<string?> AddMeasurementEntry(Guid measurementId, PostMeasurementEntryDto request){
+        var measurement = await context.Measurements.FirstOrDefaultAsync(m => m.Id == measurementId);
+        if (measurement is null){
+            return null;
+        }
+
+        Console.WriteLine("Found " + measurement.Name);
+
+        var meaEntry = new MeasurementEntry(){
+
+        };
+
+        measurement.Entries.Add(new MeasurementEntry(){
+            MeasurementId = measurement.Id,
+            Value = request.Value
+        });
+        await context.SaveChangesAsync();
+        return "ok";
+    }
+
+    
+    public async Task<List<GetMeasurementEntryDto>> GetMeasurementData(Guid measurementId){
+        var measurement = await context.Measurements.Include(m => m.Entries).FirstOrDefaultAsync(m => m.Id == measurementId);
+        var entries = new List<GetMeasurementEntryDto>();
+
+        if (measurement is null){
+            return entries;
+        }
+
+        if (measurement.Entries is null){
+            return entries;
+        }
+
+        foreach (var entry in measurement.Entries) {
+            entries.Add(new GetMeasurementEntryDto(entry.Value, entry.Time));
+        }
+        return entries;
     }
 }

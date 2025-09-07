@@ -1,5 +1,6 @@
 // src/hooks/useFetch.ts
 import { useEffect, useState } from "react";
+import { getAccessToken } from "../lib/token";
 
 const API_URL =
   import.meta.env.MODE === "development"
@@ -14,6 +15,7 @@ interface UseFetchOptions<TBody> {
   headers?: Record<string, string>;
   skip?: boolean;
   asText?: boolean; // 👈 new flag: true if expecting plain text
+  authToken?: string;
 }
 
 interface UseFetchResult<TResponse> {
@@ -28,7 +30,7 @@ export function useFetch<TResponse, TBody = unknown>(
   endpoint: string,
   options: UseFetchOptions<TBody> = {}
 ): UseFetchResult<TResponse> {
-  const { method = "GET", body, headers = {}, skip = false, asText = false } = options;
+  const { method = "GET", body, headers = {}, skip = false, asText = false, authToken = getAccessToken()} = options;
 
   const [data, setData] = useState<TResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +46,7 @@ export function useFetch<TResponse, TBody = unknown>(
         method,
         headers: {
           "Content-Type": "application/json",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
           ...headers,
         },
         body: body ? JSON.stringify(body) : undefined,

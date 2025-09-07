@@ -49,7 +49,8 @@ public class AuthController(IAuthService authService) : ControllerBase
     [Authorize]
     public async Task<IActionResult> Me(){
         var name = User.Identity?.Name;
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         Console.WriteLine("We are ok, i think");
-        return Ok(new { name });
+        return Ok(new { name, userId });
     }
 }

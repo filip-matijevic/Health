@@ -1,7 +1,11 @@
-﻿namespace Health.Api;
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace Health.Api;
 
 public interface IMeasurementService
 {
-    Task<List<string>> GetAllMeasurements(string userGuid);
     Task<string?> CreateNewMeasurement(CreateMeasurementDto request, Guid userId);
+    Task<List<GetMeasurementDto>> GetMeasurements(Guid userId);
+    Task<string?> AddMeasurementEntry(Guid measurementId, PostMeasurementEntryDto request);
+    Task<List<GetMeasurementEntryDto>> GetMeasurementData(Guid measurementId);
 }

@@ -27,7 +27,7 @@ export default function LogInForm({onLoginSuccess} : Props) {
   return (
     <div className="relative min-w-20 min-h-20 h-fit border-2 border-dashed rounded-2xl border-blue-500 p-0.5 space-y-2">
       <TextInput ref={userNameRef} label="user name" />
-      <TextInput ref={passwordRef} label="password" type="password" />
+      <TextInput ref={passwordRef} label="password" />
       <div className="h-1"></div>
       <RoundedButton label="confirm" filled={true} onClick={onSubmit} />
       {loading && (
