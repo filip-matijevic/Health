@@ -1,5 +1,9 @@
-// src/hooks/useFetch.ts
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 import { getAccessToken } from "../lib/token";
 
 const API_URL =
@@ -7,149 +11,178 @@ const API_URL =
     ? import.meta.env.VITE_LOCAL_API_URL
     : import.meta.env.VITE_API_URL;
 
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+export type UseFetchOptions = {
+  immediate: boolean;
+  auth?: boolean | { scheme?: "Bearer" };
+};
 
-export interface UseFetchOptions<TBody> {
-  method?: HttpMethod;
-  body?: TBody;
-  headers?: Record<string, string>;
-  skip?: boolean;              // don't auto-run on mount
-  asText?: boolean;            // expect plain text instead of JSON
-  auth?: boolean;              // 👈 turn on Authorization header
-  tokenKey?: string;           // localStorage key (default: "jwtToken")
-}
-
-export interface RefetchOverride<TBody> {
-  endpoint?: string;
-  method?: HttpMethod;
-  body?: TBody;
-  headers?: Record<string, string>;
-  asText?: boolean;
-  auth?: boolean;              // override per-call
-  tokenKey?: string;           // override per-call
-}
-
-export interface UseFetchResult<TResponse, TBody> {
-  data: TResponse | null;
-  error: string | null;
+export type UseFetchReturn<T> = {
   loading: boolean;
-  refetch: (override?: RefetchOverride<TBody>) => Promise<void>;
-  reset: () => void;
+  error: string | null;
+  data: T | null;
+  url: string;
+  load: () => Promise<T | null>;
+  updateUrl: React.Dispatch<React.SetStateAction<string>>;
+  updateOptions: React.Dispatch<React.SetStateAction<UseFetchOptions>>;
+  /** Synchronous for load(): updates a ref immediately */
+  updateRequestOptions: (
+    next: RequestInit | ((prev: RequestInit | undefined) => RequestInit)
+  ) => void;
+  /** Awaitable version if you prefer */
+  updateRequestOptionsAsync: (
+    next: RequestInit | ((prev: RequestInit | undefined) => RequestInit)
+  ) => Promise<void>;
+};
+
+function joinUrl(base: string, path: string): string {
+  if (!base) return path;
+  if (!path) return base;
+  return `${base.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
 }
 
-export function useFetch<TResponse, TBody = unknown>(
-  endpoint: string,
-  options: UseFetchOptions<TBody> = {}
-): UseFetchResult<TResponse, TBody> {
-  const {
-    method = "GET",
-    body,
-    headers = {},
-    skip = false,
-    asText = false,
-    auth = false,
-    tokenKey = "jwtToken",
-  } = options;
+function useBearerAuth(authOpt: UseFetchOptions["auth"]): boolean {
+  if (!authOpt) return false;
+  if (authOpt === true) return true;
+  return authOpt.scheme === "Bearer";
+}
 
-  const [data, setData] = useState<TResponse | null>(null);
+export default function useFetch<T>(
+  initialUrl: string,
+  initialRequestOptions?: RequestInit,
+  initialOptions?: UseFetchOptions
+): UseFetchReturn<T> {
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(!skip);
-
-  // keep latest baseline config in a ref (so refetch always uses the newest values)
-  const base = useRef({
-    endpoint,
-    method,
-    body,
-    headers,
-    asText,
-    auth,
-    tokenKey,
-  });
-
-  // abort + mounted guards
-  const abortRef = useRef<AbortController | null>(null);
-  const mountedRef = useRef(true);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-      abortRef.current?.abort();
-    };
-  }, []);
-
-  // update base config when inputs change
-  useEffect(() => {
-    base.current = { endpoint, method, body, headers, asText, auth, tokenKey };
-  }, [endpoint, method, body, headers, asText, auth, tokenKey]);
-
-  const doFetch = useCallback(
-    async (override?: RefetchOverride<TBody>) => {
-      setLoading(true);
-      setError(null);
-
-      // cancel any in-flight request
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-
-      const ep = override?.endpoint ?? base.current.endpoint;
-      const mtd = override?.method ?? base.current.method;
-      const bdy = override?.body ?? base.current.body;
-      const hdrs = { ...base.current.headers, ...(override?.headers ?? {}) };
-      const txt = override?.asText ?? base.current.asText;
-
-      const useAuth = override?.auth ?? base.current.auth;
-
-      const token = useAuth ? getAccessToken() : undefined;
-
-      try {
-        const response = await fetch(`${API_URL}${ep}`, {
-          method: mtd,
-          signal: controller.signal,
-          headers: {
-            "Content-Type": "application/json",
-            ...(useAuth && token ? { Authorization: `Bearer ${token}` } : {}),
-            ...hdrs,
-          },
-          // only attach body when provided (and when method allows it)
-          body: bdy !== undefined && mtd !== "GET" ? JSON.stringify(bdy) : undefined,
-        });
-
-        if (!response.ok) {
-          // try to include server error payload if available
-          let msg = `API error: ${response.status} ${response.statusText}`;
-          try {
-            const text = await response.text();
-            if (text) msg += ` - ${text}`;
-          } catch {}
-          throw new Error(msg);
-        }
-
-        const result = (txt ? await response.text() : await response.json()) as TResponse;
-
-        if (mountedRef.current) setData(result);
-      } catch (err: any) {
-        if (err?.name === "AbortError") return; // ignore aborts
-        if (mountedRef.current) setError((err as Error).message);
-      } finally {
-        if (mountedRef.current) setLoading(false);
-      }
-    },
-    []
+  const [loading, setLoading] = useState<boolean>(false);
+  const [data, setData] = useState<T | null>(null);
+  const [options, updateOptions] = useState<UseFetchOptions>(
+    initialOptions || { immediate: true }
   );
+  const [url, updateUrl] = useState(initialUrl);
 
-  // initial auto-run
+  // Keep state for visibility, but the ref is the source of truth for load()
+  const [requestOptionsState, setRequestOptionsState] = useState<RequestInit | undefined>(
+    initialRequestOptions
+  );
+  const requestOptionsRef = useRef<RequestInit | undefined>(initialRequestOptions);
+
+  // Allow awaiting a state commit if desired
+  const pendingResolveRef = useRef<(() => void) | null>(null);
   useEffect(() => {
-    if (!skip) doFetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [skip, endpoint, method, asText, auth, tokenKey]); // body/headers changes won't auto-fire unless you want them to
+    // resolve any waiter after requestOptionsState updates
+    pendingResolveRef.current?.();
+    pendingResolveRef.current = null;
+  }, [requestOptionsState]);
 
-  const reset = useCallback(() => {
-    setData(null);
-    setError(null);
-    setLoading(false);
+  const updateRequestOptions = useCallback((
+    next: RequestInit | ((prev: RequestInit | undefined) => RequestInit)
+  ) => {
+    const value =
+      typeof next === "function"
+        ? (next as (p: RequestInit | undefined) => RequestInit)(requestOptionsRef.current)
+        : next;
+    // Update ref synchronously so load() right after this sees the new body
+    requestOptionsRef.current = value;
+    // Also update state for re-renders/devtools
+    setRequestOptionsState(value);
   }, []);
 
-  return { data, error, loading, refetch: doFetch, reset };
+  const updateRequestOptionsAsync = useCallback(async (
+    next: RequestInit | ((prev: RequestInit | undefined) => RequestInit)
+  ) => {
+    await new Promise<void>((resolve) => {
+      pendingResolveRef.current = resolve;
+      updateRequestOptions(next);
+    });
+  }, [updateRequestOptions]);
+
+  const abortController = useRef(new AbortController());
+
+  const load = useCallback(async () => {
+    const localUrl = url; // capture once
+    const localReq = requestOptionsRef.current || {}; // <-- read from ref (fresh)
+
+    // cancel in-flight and prepare a new controller
+    abortController.current.abort();
+    abortController.current = new AbortController();
+
+    setData(null);
+    if (!localUrl) {
+      setError("Empty URL");
+      return null;
+    } else {
+      setError(null);
+    }
+    setLoading(true);
+
+    try {
+      const requestInit: RequestInit = { ...localReq, signal: abortController.current.signal };
+      const currentAbortController = abortController.current;
+
+      const headers = new Headers(requestInit.headers || undefined);
+
+      if (useBearerAuth(options.auth)) {
+        const token = getAccessToken();
+        if (!token) {
+          setLoading(false);
+          setError("No access token available");
+          return null;
+        }
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+
+      // If there's a body but no explicit Content-Type, default to JSON
+      if (requestInit.body && !headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+      }
+      requestInit.headers = headers;
+
+      const response = await fetch(joinUrl(API_URL, localUrl), requestInit);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} ${response.statusText}`);
+      }
+
+      const json = await response.json();
+
+      if (currentAbortController.signal.aborted) {
+        // silently exit if this request was aborted post-response
+        return null;
+      }
+
+      setData(json as T);
+      return json;
+    } catch (e) {
+      const err = e as Error;
+      if (err.name === "AbortError") {
+        setData(null);
+        setError(null);
+      } else {
+        setError(err.message);
+      }
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [url, options.auth]);
+
+  useEffect(() => {
+    if (options.immediate) {
+      void load();
+    }
+    return () => {
+      abortController.current.abort();
+    };
+  }, [load, options.immediate]);
+
+  return {
+    url,
+    loading,
+    error,
+    data,
+    load,
+    updateUrl,
+    updateOptions,
+    updateRequestOptions,       // sync for load()
+    updateRequestOptionsAsync,  // awaitable if you want
+  };
 }

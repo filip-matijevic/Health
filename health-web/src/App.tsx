@@ -1,58 +1,72 @@
 import { useEffect, useState } from "react";
-import { clearAccessToken } from "./lib/token";
-import LogInForm from "./components/forms/LogInForm";
-import RoundedButton from "./components/inputs/RoundedButton";
-import Landing from "./components/static_elements/Landing";
+import { clearAccessToken, setAccessToken } from "./lib/token";
 import NavigationPage from "./components/pages/NavigationPage";
-import { useFetch } from "./hooks/useFetch";
+import useFetch from "./hooks/useFetch";
+import LoginPage from "./components/pages/LoginPage";
+
+type UserCheck = {
+  name: string;
+  userId: string;
+};
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const { data, loading, error } = useFetch<string>(
-    "/api/Auth/me",
-    { method: "GET", auth: true }
+  const { data, loading } = useFetch<UserCheck>(
+    "/api/auth/check",
+    { method: "GET" },
+    { immediate: true, auth: true }
   );
 
-  useEffect(() => {
-    if (!loading) {
-      if (data && !error) {
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
-      }
+
+  useEffect(()=>{
+    if (data){
+      setIsAuthenticated(true);
     }
-  }, [data, error, loading]);
+  }, [data]);
+  //check if authenticated
 
   function ResetLoggedInUser(): void {
+    console.log("cleared access token");
     clearAccessToken();
     setIsAuthenticated(false);
   }
-  function SetLoggedInUser(): void {
+  function SetLoggedInUser(token: string): void {
+    setAccessToken(token);
     setIsAuthenticated(true);
+  }
+
+
+
+  if (loading) {
+    return (
+      <div className="flex-col gap-4 w-full flex items-center justify-top pt-22">
+        <div className="w-20 h-20 border-4 border-transparent text-blue-400 text-4xl animate-spin flex items-center justify-center border-t-blue-400 rounded-full">
+          <div className="w-16 h-16 border-4 border-transparent text-red-400 text-2xl animate-spin flex items-center justify-center border-t-red-400 rounded-full"></div>
+        </div>
+      </div>
+    );
   }
 
   if (isAuthenticated) {
     return (
-      <div className="
+      <div
+        className="
       flex flex-col
     h-screen
     supports-[height:100dvh]:h-[100dvh]
     supports-[height:100svh]:h-[100svh]
     pb-[env(safe-area-inset-bottom)]
-    bg-white">
-      <NavigationPage logOutUser={ResetLoggedInUser}/>
+    bg-clr-surface-a0"
+      >
+        <NavigationPage logOutUser={ResetLoggedInUser} />
       </div>
     );
   }
 
   return (
-    <div className="h-screen min-h-dvh w-screen bg-white overflow-hidden flex justify-center">
-      <div className="bg-white space-y-2 w-66">
-        <Landing />
-        <LogInForm onLoginSuccess={SetLoggedInUser}/>
-        <RoundedButton label="Registger" color="red-500" filled={false} />
-      </div>
+    <div className="h-screen min-h-dvh w-screen bg-surface-a0 overflow-hidden flex justify-center">
+      <LoginPage onLoginSuccess={SetLoggedInUser} />
     </div>
   );
 }

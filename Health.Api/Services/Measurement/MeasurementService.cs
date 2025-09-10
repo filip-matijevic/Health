@@ -61,7 +61,7 @@ public class MeasurementService(HealthDbContext context) : IMeasurementService
 
         return meaNames;
     }
-    public async Task<string?> AddMeasurementEntry(Guid measurementId, PostMeasurementEntryDto request){
+    public async Task<GetMeasurementEntryDto> AddMeasurementEntry(Guid measurementId, PostMeasurementEntryDto request){
         var measurement = await context.Measurements.FirstOrDefaultAsync(m => m.Id == measurementId);
         if (measurement is null){
             return null;
@@ -69,16 +69,14 @@ public class MeasurementService(HealthDbContext context) : IMeasurementService
 
         Console.WriteLine("Found " + measurement.Name);
 
-        var meaEntry = new MeasurementEntry(){
-
-        };
-
-        measurement.Entries.Add(new MeasurementEntry(){
+        var meaEntry = new MeasurementEntry(){            
             MeasurementId = measurement.Id,
             Value = request.Value
-        });
+        };
+
+        measurement.Entries.Add(meaEntry);
         await context.SaveChangesAsync();
-        return "ok";
+        return new GetMeasurementEntryDto(meaEntry.Value, meaEntry.Time);
     }
 
     

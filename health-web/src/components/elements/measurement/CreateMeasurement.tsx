@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import RoundedButton from "../../inputs/RoundedButton";
 import TextInput from "../../inputs/TextInput";
-import { useFetch } from "../../../hooks/useFetch";
+import useFetch from "../../../hooks/useFetch";
 
 type Props = {
   onCreate: () => void;
@@ -10,20 +10,25 @@ export default function CreateMeasurement({ onCreate }: Props) {
 
     const nameRef = useRef<HTMLInputElement>(null);
 
-    const { refetch } = useFetch<string, { name: string;}>(
+    const createMeasurementHook = useFetch<string>(
         "/api/Measurement",
         {
           method: "POST",
-          skip: true, // don't run automatically
-          auth: true
-        }
+        },
+        { immediate: false, auth: true }
       );
       
     async function SubmitNewMeasurement(): Promise<void> {
         const measurementName = nameRef.current?.value?.trim();
         if (!measurementName) return;
-
-        await refetch({body : {name:measurementName}});
+        createMeasurementHook.updateRequestOptions({
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: measurementName,
+            }),
+          });
+        await createMeasurementHook.load();
         onCreate();
     }
 

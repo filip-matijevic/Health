@@ -35,8 +35,8 @@ public class MeasurementController(IMeasurementService service) : ControllerBase
 
     [HttpPost("Measurement/{id:guid}")]
     [Authorize]
-    public async Task<string?> AddMeasurementValue(Guid id, PostMeasurementEntryDto request){
-        return await service.AddMeasurementEntry(id, request);
+    public async Task<IActionResult> AddMeasurementValue(Guid id, PostMeasurementEntryDto request){
+        return Ok(await service.AddMeasurementEntry(id, request));
     }
 
     [HttpGet("Data/{id:guid}")]

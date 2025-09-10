@@ -1,44 +1,50 @@
 import { useState } from "react";
 import { type ReactNode } from "react";
 import NavigationBar, { type NavigationKey } from "../elements/NavigationBar";
-import RoundedButton from "../inputs/RoundedButton";
-import NavigationHeader from "../elements/NavigationHeader";
 import MeasurementPage from "./MeasurementPage";
+import UserSettingsPage from "./UserSettingsPage";
 
 type Props = {
   logOutUser: () => void;
 };
 
 export type Page = {
+  key: NavigationKey;
   header: string;
   content: ReactNode;
 };
 
-const PAGES: Record<NavigationKey, Page> = {
-  home: {
-    header: "Home",
-    content: <div>Home Page</div>,
-  },
-  search: {
-    header: "Measurement",
-    content: <MeasurementPage />,
-  },
-  create: {
-    header: "Create",
-    content: <div>Create Page</div>,
-  },
-  notifications: {
-    header: "Notifications",
-    content: <div>Notifications Page</div>,
-  },
-  profile: {
-    header: "Profile",
-    content: <div>Profile Page</div>,
-  },
-};
-
 export default function NavigationPage({ logOutUser }: Props) {
-  const [selectedPage, setSelectedPage] = useState<Page>(PAGES.home);
+  const PAGES: Record<NavigationKey, Page> = {
+    dashboard: {
+      key: "create",
+      header: "Home",
+      content: <div>Home Page</div>,
+    },
+    measurements: {
+      key: "measurements",
+      header: "Measurement",
+      content: <MeasurementPage />,
+    },
+    create: {
+      key: "create",
+      header: "Create",
+      content: <div>Create Page</div>,
+    },
+    notifications: {
+      key: "notifications",
+      header: "Notifications",
+      content: <div>Notifications Page</div>,
+    },
+    profile: {
+      key: "profile",
+      header: "Profile",
+      content: <UserSettingsPage onSignOut={LogOutUser} />,
+    },
+  };
+
+  const [selectedPage, setSelectedPage] = useState<Page>(PAGES.dashboard);
+
   function SetActiveTab(key: NavigationKey): void {
     console.log("Selected the page " + key);
     setSelectedPage(PAGES[key]);
@@ -51,18 +57,21 @@ export default function NavigationPage({ logOutUser }: Props) {
 
   return (
     <div className="h-full w-full flex flex-col">
-        
-      <div hidden={true}>
-        <RoundedButton
-          label="Log out"
-          filled={true}
-          className="w-fit"
-          onClick={LogOutUser}
-        ></RoundedButton>
-        {selectedPage.header}
-      </div>
-      <NavigationHeader title={selectedPage.header} onLogOut={LogOutUser}/>
-      <div className="pt-13">{selectedPage.content}</div>
+      {(Object.entries(PAGES) as [NavigationKey, Page][]).map(([key, page]) => {
+        const isActive = selectedPage.key === key;
+        return (
+          <section
+            key={key}
+            className={`
+                absolute inset-0 h-full w-full transition-opacity duration-300
+                ${isActive ? "opacity-100" : "opacity-0 pointer-events-none"}
+              `}
+            hidden={!isActive && false} // keep it mounted, just moved off-screen
+          >
+            {page.content}
+          </section>
+        );
+      })}
       <NavigationBar onSelect={SetActiveTab} />
     </div>
   );

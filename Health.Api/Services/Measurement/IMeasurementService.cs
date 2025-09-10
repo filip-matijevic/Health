@@ -6,6 +6,6 @@ public interface IMeasurementService
 {
     Task<string?> CreateNewMeasurement(CreateMeasurementDto request, Guid userId);
     Task<List<GetMeasurementDto>> GetMeasurements(Guid userId);
-    Task<string?> AddMeasurementEntry(Guid measurementId, PostMeasurementEntryDto request);
+    Task<GetMeasurementEntryDto> AddMeasurementEntry(Guid measurementId, PostMeasurementEntryDto request);
     Task<List<GetMeasurementEntryDto>> GetMeasurementData(Guid measurementId);
 }

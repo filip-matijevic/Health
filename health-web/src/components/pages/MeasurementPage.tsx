@@ -1,6 +1,7 @@
-import { useFetch } from "../../hooks/useFetch";
-import CreateMeasurement from "../elements/measurement/CreateMeasurement";
+import useFetch from "../../hooks/useFetch";
 import Measurement from "../elements/measurement/Measurement";
+import MaterialInput from "../inputs/MaterialInput";
+import MaterialRoundedButton from "../inputs/MaterialRoundedButton";
 
 
 export default function MeasurementPage(){
@@ -11,22 +12,27 @@ export default function MeasurementPage(){
         description: string;
     }
 
-    const { data: measurements, refetch} = useFetch<MeasurementType[]>("/api/Measurement/Measurements", {
+    const { data: measurements} = useFetch<MeasurementType[]>("/api/Measurement/Measurements", {
         method: "GET",
-        auth: true
-    });
-    console.log(measurements);
-
+    }, 
+    { immediate: true, auth: true });
     return(
-    <div>
-        <ul className="p-4 space-y-3">
+    <div className="p-4">
+        <p className="font-extrabold text-light-a0 text-2xl flex justify-between items-center">
+            MEASUREMENTS
+        </p>
+        <div className="pt-4 pb-3 border-b-1 border-surface-a40 mb-3 flex flex-row space-x-2">
+            <MaterialInput placeholder="Track someting new!"/>
+            <MaterialRoundedButton label="Create"/>
+        </div>
+        <ul className="space-y-3">
             {measurements?.map(item => (
                 <li key={item.id}>
                     <Measurement name={item.name} id={item.id}/>
                 </li>
             ))}
         </ul>
-        <CreateMeasurement onCreate={()=>refetch()}/>
+
 
     </div>)
 }

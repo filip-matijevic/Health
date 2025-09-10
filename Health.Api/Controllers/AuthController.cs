@@ -24,7 +24,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<string>> Login(LoginRequestDto request)
+    public async Task<ActionResult<TokenResponseDto>> Login(LoginRequestDto request)
     {
         var result = await authService.LoginAsync(request);
         if (result is null){
@@ -45,12 +45,11 @@ public class AuthController(IAuthService authService) : ControllerBase
         return Ok(await authService.GetUserCount());
     }
 
-    [HttpGet("me")]
+    [HttpGet("Check")]
     [Authorize]
     public async Task<IActionResult> Me(){
         var name = User.Identity?.Name;
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        Console.WriteLine("We are ok, i think");
         return Ok(new { name, userId });
     }
 }
