@@ -5,6 +5,8 @@ export default function MeasurementDetailsView(){
         overview where there will be a simple add button, maybe already with an input field for 
         quick adding. there should also be a graph which shows the progress and options to 
         show graph by days, weeks, months etc
+
+        This is a PWA update
         
     </div>)
 }
