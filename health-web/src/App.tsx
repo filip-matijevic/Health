@@ -3,6 +3,8 @@ import { clearAccessToken, setAccessToken } from "./lib/token";
 import NavigationPage from "./components/pages/NavigationPage";
 import useFetch from "./hooks/useFetch";
 import LoginPage from "./components/pages/LoginPage";
+import { setupServiceWorker } from "./sw-updater";
+import UpdateBanner from "./components/UpdateBanner";
 
 type UserCheck = {
   name: string;
@@ -11,6 +13,14 @@ type UserCheck = {
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const [applyUpdate, setApplyUpdate] = useState<null | (() => void)>(null)
+
+  useEffect(() => {
+    setupServiceWorker(({ apply }) => {
+      setApplyUpdate(() => apply)
+    })
+  }, [])
 
   const { data, loading } = useFetch<UserCheck>(
     "/api/auth/check",
@@ -34,6 +44,13 @@ function App() {
   function SetLoggedInUser(token: string): void {
     setAccessToken(token);
     setIsAuthenticated(true);
+  }
+
+  if (applyUpdate){
+    return(<UpdateBanner
+      onReload={() => applyUpdate()}
+      onDismiss={() => setApplyUpdate(null)}
+    />)
   }
 
 
