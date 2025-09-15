@@ -41,25 +41,12 @@ function App() {
     setIsAuthenticated(true);
   }
 
-  // 🔔 Show banner as overlay instead of replacing the whole app
-  // (If you prefer your previous behavior, keep the early return)
-  const updateBanner =
-    applyUpdate && (
-      <div className="fixed inset-x-0 bottom-4 z-50 flex justify-center">
-        <UpdateBanner
-          onReload={() => applyUpdate()}
-          onDismiss={() => setApplyUpdate(null)}
-        />
-      </div>
-    );
-
   if (loading) {
     return (
       <div className="flex-col gap-4 w-full flex items-center justify-top pt-22">
         <div className="w-20 h-20 border-4 border-transparent text-blue-400 text-4xl animate-spin flex items-center justify-center border-t-blue-400 rounded-full">
           <div className="w-16 h-16 border-4 border-transparent text-red-400 text-2xl animate-spin flex items-center justify-center border-t-red-400 rounded-full"></div>
         </div>
-        {updateBanner}
       </div>
     );
   }
@@ -68,7 +55,6 @@ function App() {
     return (
       <div className="flex flex-col h-screen supports-[height:100dvh]:h-[100dvh] supports-[height:100svh]:h-[100svh] pb-[env(safe-area-inset-bottom)] bg-clr-surface-a0">
         <NavigationPage logOutUser={ResetLoggedInUser} />
-        {updateBanner}
       </div>
     );
   }
@@ -76,7 +62,6 @@ function App() {
   return (
     <div className="h-screen min-h-dvh w-screen bg-surface-a0 overflow-hidden flex justify-center">
       <LoginPage onLoginSuccess={SetLoggedInUser} />
-      {updateBanner}
     </div>
   );
 }
