@@ -1,27 +1,27 @@
-import type { ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { RoundedFull } from "../primitives/Rounded";
 
-type RoundedButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  label: string;
-  filled: boolean;
-};
+type Props = {
+  label?: string;
+  className?: string;
+  icon?: ReactNode;
+} & ButtonHTMLAttributes<HTMLButtonElement>;
 
 export default function RoundedButton({
   label,
-  filled,
+  icon,
   className = "",
-  ...props
-}: RoundedButtonProps) {
-    const textColor = filled ? "text-white" : "text-blue-500"
-    const bgColor = filled ? "bg-blue-500" : "bg-transparent"
+  ...rest
+}: Props) {
   return (
-    <div 
-    className={`border-2 rounded-2xl border-blue-500 ${filled ? 'p-0' : 'p-0.5 border-dashed'} ${className}`}>
+    <RoundedFull className={`${className ?? ""}`}>
       <button
-        {...props}
-        className={`px-4 py-2 w-full h-full ${textColor} font-bold ${bgColor} rounded-[13px] uppercase `}
+        className={`flex flex-row h-full aspect-square items-center justify-center ${(icon && label) ? "mr-2" : ""}`}
+        {...rest}
       >
-        {label}
+        {icon && <div className="flex aspect-square h-full p-2">{icon}</div>}
+        {label && <div className="flex-1">{label}</div>}
       </button>
-    </div>
+    </RoundedFull>
   );
 }

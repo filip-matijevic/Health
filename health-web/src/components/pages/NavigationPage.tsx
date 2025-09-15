@@ -3,6 +3,7 @@ import { type ReactNode } from "react";
 import NavigationBar, { type NavigationKey } from "../elements/NavigationBar";
 import MeasurementPage from "./MeasurementPage";
 import UserSettingsPage from "./UserSettingsPage";
+import NewMeasurementPage from "./NewMeasurementPage";
 
 type Props = {
   logOutUser: () => void;
@@ -29,7 +30,7 @@ export default function NavigationPage({ logOutUser }: Props) {
     create: {
       key: "create",
       header: "Create",
-      content: <div>Create Page</div>,
+      content: <NewMeasurementPage/>
     },
     notifications: {
       key: "notifications",

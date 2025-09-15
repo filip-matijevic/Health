@@ -1,16 +1,18 @@
 import useFetch from "../../hooks/useFetch";
 import Measurement from "../elements/measurement/Measurement";
-import MaterialInput from "../inputs/MaterialInput";
-import MaterialRoundedButton from "../inputs/MaterialRoundedButton";
+import type { MeasurementValueType } from "../elements/measurement/MeasurementValue";
+import { PlusSvg } from "../icons/Icons";
+import InputFieldButton from "../inputs/inputFields/InputFieldButton";
 
+export type MeasurementType ={
+    name: string;
+    id: string;
+    description: string;
+    values? : MeasurementValueType[];
+}
 
 export default function MeasurementPage(){
 
-    type MeasurementType ={
-        name: string;
-        id: string;
-        description: string;
-    }
 
     const { data: measurements} = useFetch<MeasurementType[]>("/api/Measurement/Measurements", {
         method: "GET",
@@ -22,8 +24,7 @@ export default function MeasurementPage(){
             MEASUREMENTS
         </p>
         <div className="pt-4 pb-3 border-b-1 border-surface-a40 mb-3 flex flex-row space-x-2">
-            <MaterialInput placeholder="Track someting new!"/>
-            <MaterialRoundedButton label="Create"/>
+            <InputFieldButton icon={<PlusSvg/>} placeholder="Create a new measurement" className="w-full"/>
         </div>
         <ul className="space-y-3">
             {measurements?.map(item => (

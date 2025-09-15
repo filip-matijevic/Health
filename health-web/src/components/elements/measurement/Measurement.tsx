@@ -1,12 +1,13 @@
 import { useRef, useState } from "react";
 import useFetch from "../../../hooks/useFetch";
-import { ArrowDown } from "../../icons/Icons";
-import MaterialInput from "../../inputs/MaterialInput";
-import MaterialRoundedButton from "../../inputs/MaterialRoundedButton";
+import { FileDetailsSvg, PlusSvg } from "../../icons/Icons";
 import MeasurementValue, {
   type MeasurementValueType,
 } from "./MeasurementValue";
 import MeasurementValueTrend from "./MeasurementValueTrend";
+import InputFieldButton from "../../inputs/inputFields/InputFieldButton";
+import { RoundedBase } from "../../primitives/Rounded";
+import RoundedButton from "../../inputs/RoundedButton";
 
 type Props = {
   name: string;
@@ -31,33 +32,36 @@ export default function Measurement({ name, id }: Props) {
     { immediate: false, auth: true }
   );
 
-
   const valueRef = useRef<HTMLInputElement>(null);
 
-  async function postNewData(){
+  async function postNewData() {
     newDataFetch.updateRequestOptions({
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          value: valueRef.current?.value
-        }),
-      });
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        value: valueRef.current?.value,
+      }),
+    });
 
-      const response = await newDataFetch.load();
-      if (response){
-          meaData.load();    
-          if (valueRef.current) {
-            valueRef.current.value = ""; // clear the field
-          }
-          setExpanded(false);
+    const response = await newDataFetch.load();
+    if (response) {
+      meaData.load();
+      if (valueRef.current) {
+        valueRef.current.value = ""; // clear the field
       }
-
+      setExpanded(false);
+    }
   }
 
   return (
-    <div className="bg-surface-a20 rounded-xl shadow-inner shadow-surface-tonal-a0 border-1 border-surface-a20">
-      <div className="flex flex-row items-center justify-between ">
-        <p className="px-2 text-primary-a50 capitalize font-semibold text-[16px] w-26">
+    <RoundedBase
+      className="bg-surface-a10"
+      onClick={() => {
+        setExpanded(!expanded);
+      }}
+    >
+      <div className="flex flex-row items-center justify-between p-2">
+        <p className="px-2 text-primary-a50 uppercase font-semibold text-[16px] w-26">
           {name}
         </p>
         <div className="flex-grow h-10 text-white">
@@ -66,30 +70,32 @@ export default function Measurement({ name, id }: Props) {
           ) : (
             <div className="flex flex-row items-center space-x-4">
               <MeasurementValue value={meaData.data[0]} />
-              <MeasurementValueTrend/>
-              <MeasurementValue value={meaData.data[meaData.data.length-1]} />
+              <MeasurementValueTrend />
+              <MeasurementValue value={meaData.data[meaData.data.length - 1]} />
             </div>
           )}
         </div>
-        <button
-          className="text-surface-a10 w-11 h-11 p-3"
-          onClick={() => {
-            setExpanded(!expanded);
-          }}
-        >
-          <ArrowDown />
-        </button>
       </div>
       <div
         className={`${
-          expanded ? "h-11 m-2 opacity-100" : "h-0 m-0 opacity-0"
-        } overflow-hidden transition-all duration-300`}
+          expanded ? "h-14 opacity-100" : "h-0 m-0 opacity-0"
+        } overflow-hidden transition-all duration-300 flex items-end`}
       >
-        <div className="flex flex-row w-70">
-          <MaterialInput placeholder="New entry" ref={valueRef} />
-          <MaterialRoundedButton label="Add" onClick={postNewData}/>
+        <div className="flex flex-row space-x-1 justify-between w-full">
+          <InputFieldButton
+            icon={<PlusSvg />}
+            placeholder="Add value"
+            className="w-44 m-1"
+          />
+          <div className="flex flex-row items-end space-x-1 m-2">
+            <RoundedButton
+              icon={<FileDetailsSvg />}
+              label="Progress"
+              className="h-9 text-surface-a10 bg-gradient-to-br from-primary-a0 to-primary-a30"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </RoundedBase>
   );
 }

@@ -3,6 +3,7 @@ import useFetch from "../../hooks/useFetch";
 import type { LoginResponse } from "../../services/auth";
 import MaterialInput from "../inputs/MaterialInput";
 import MaterialRoundedButton from "../inputs/MaterialRoundedButton";
+import InputFieldButton from "../inputs/inputFields/InputFieldButton";
 
 type Props = {
     onLoginSuccess: (token: string) => void;
@@ -56,6 +57,7 @@ export default function LoginPage({onLoginSuccess} : Props) {
         <p className="text-surface-a50 text-xs pr-3">Forgor password?</p>
         <MaterialRoundedButton label="Sign in" onClick={submit}/>
       </div>
+      <InputFieldButton/>
     </div>
   );
 }

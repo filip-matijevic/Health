@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import RoundedButton from "../../inputs/RoundedButton";
 import TextInput from "../../inputs/TextInput";
 import useFetch from "../../../hooks/useFetch";
 
@@ -35,11 +34,6 @@ export default function CreateMeasurement({ onCreate }: Props) {
   return (
     <div className="flex flex-row gap-2 p-2">
       <TextInput ref={nameRef}
-      />
-      <RoundedButton
-        label="submit"
-        filled={false}
-        onClick={SubmitNewMeasurement}
       />
     </div>
   );
