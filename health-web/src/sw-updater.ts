@@ -1,26 +1,31 @@
+// sw-updater.ts
 import { Workbox } from 'workbox-window'
 
-export type OnUpdateCallback = (opts: { apply: () => void }) => void
+export type ApplyUpdate = () => void
+export type OnUpdate = (opts: { apply: ApplyUpdate }) => void
 
-export function setupServiceWorker(onUpdate: OnUpdateCallback) {
-  if ('serviceWorker' in navigator) {
-    const wb = new Workbox('/sw.js', { scope: '/' })
+export function setupServiceWorker(onUpdate: OnUpdate): void {
+  if (!('serviceWorker' in navigator)) return
 
-    // When a new SW is waiting, prompt the user
-    wb.addEventListener('waiting', () => {
-      onUpdate({
-        apply: async () => {
-          // Tell the waiting SW to activate now
+  const swUrl = `${import.meta.env.BASE_URL}sw.js`
+  const scope = import.meta.env.BASE_URL || '/'
+
+  const wb = new Workbox(swUrl, { scope })
+
+  const handleWaiting = () => {
+    onUpdate({
+      apply: async () => {
+        const reload = () => window.location.reload()
+        wb.addEventListener('controlling', reload)
+        try {
           await wb.messageSkipWaiting()
-          // Reload to get the new content
+        } catch {
           window.location.reload()
         }
-      })
+      },
     })
-
-    // Optional: updatefound can be used to show "Updating..." UI
-    // wb.addEventListener('installed', (e) => { if (!e.isUpdate) ... })
-
-    wb.register()
   }
+
+  wb.addEventListener('waiting', handleWaiting)
+  wb.register().catch(() => {})
 }
