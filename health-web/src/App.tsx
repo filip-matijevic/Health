@@ -5,6 +5,7 @@ import useFetch from "./hooks/useFetch";
 import LoginPage from "./components/pages/LoginPage";
 import { setupServiceWorker, type ApplyUpdate } from "./sw-updater";
 import UpdateBanner from "./components/UpdateBanner";
+import LoadingView from "./components/views/LoadingView";
 
 type UserCheck = { name: string; userId: string };
 
@@ -43,11 +44,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="flex-col gap-4 w-full flex items-center justify-top pt-22">
-        <div className="w-20 h-20 border-4 border-transparent text-blue-400 text-4xl animate-spin flex items-center justify-center border-t-blue-400 rounded-full">
-          <div className="w-16 h-16 border-4 border-transparent text-red-400 text-2xl animate-spin flex items-center justify-center border-t-red-400 rounded-full"></div>
-        </div>
-      </div>
+      <LoadingView/>
     );
   }
 

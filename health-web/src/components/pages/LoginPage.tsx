@@ -39,7 +39,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
   }
   return (
     <div className="pt-20 w-full mx-4 space-y-2">
-      {loading ?? <LoadingView />}
+      {loading && <LoadingView />}
       <div className="flex flex-col px-20 space-y-2">
         <PetiteInputField placeholder="username" ref={userNameRef} />
         <PetiteInputField placeholder="password" ref={passwordRef} />
