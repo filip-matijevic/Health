@@ -1,4 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
+import React, { forwardRef } from "react";
 
 type Props = {
     children? : ReactNode;
@@ -18,3 +19,30 @@ export function RoundedFull({children, className, ...rest} : Props){
         {children}
     </div>)
 }
+
+
+type GlassSurfaceProps = React.HTMLAttributes<HTMLDivElement> & {
+  /** Tailwind background tint, e.g. "bg-white/10" */
+  tint?: string;
+};
+
+export const GlassSurface = forwardRef<HTMLDivElement, GlassSurfaceProps>(
+  ({ className = "", tint = "bg-white/0", children, ...rest }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={[
+          // base glass look
+          "backdrop-blur-md shadow-inner shadow-white/20",
+          tint,
+          className,
+        ].join(" ")}
+        {...rest}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+GlassSurface.displayName = "GlassSurface";

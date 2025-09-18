@@ -4,6 +4,7 @@ import MeasurementDetailsView from "../views/MeasurementDetailsView";
 import NewMeasurementView from "../views/NewMeasurementView";
 import type { MeasurementType } from "./MeasurementPage";
 import { measurementMock } from "../mock/measurementMock";
+import MeasurementDetails from "../elements/LiquidGlass/Measurement/MeasurementDetails";
 
 export default function NewMeasurementPage() {
   const [headerView, setHeaderView] = useState<ReactNode>(null);
@@ -22,7 +23,7 @@ export default function NewMeasurementPage() {
 
   return (
     <div className="text-white">
-      {headerView}
+        <MeasurementDetails/>
       <MeasurementList
         onCreateBegin={showCreateView}
         onMeasurementSelect={showSelectedMeasurement}

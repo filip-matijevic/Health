@@ -10,7 +10,7 @@ import LoadingView from "./components/views/LoadingView";
 type UserCheck = { name: string; userId: string };
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   // 👇 Explicit type — either function or null
   const [applyUpdate, setApplyUpdate] = useState<ApplyUpdate | null>(null);

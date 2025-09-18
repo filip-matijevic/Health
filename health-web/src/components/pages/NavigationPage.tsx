@@ -4,6 +4,7 @@ import NavigationBar, { type NavigationKey } from "../elements/NavigationBar";
 import MeasurementPage from "./MeasurementPage";
 import UserSettingsPage from "./UserSettingsPage";
 import NewMeasurementPage from "./NewMeasurementPage";
+import LGNavigationBar from "../elements/LiquidGlass/Navigation/LGNavigationBar";
 
 type Props = {
   logOutUser: () => void;
@@ -57,7 +58,7 @@ export default function NavigationPage({ logOutUser }: Props) {
   }
 
   return (
-    <div className="h-full w-full flex flex-col">
+    <div className="h-full w-full flex flex-col items-center">
       {(Object.entries(PAGES) as [NavigationKey, Page][]).map(([key, page]) => {
         const isActive = selectedPage.key === key;
         return (
@@ -73,7 +74,8 @@ export default function NavigationPage({ logOutUser }: Props) {
           </section>
         );
       })}
-      <NavigationBar onSelect={SetActiveTab} />
+      
+      <LGNavigationBar/>
     </div>
   );
 }
